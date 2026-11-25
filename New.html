@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zelcy Wiluarta — Embedded Systems & Web Developer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        obsidian: {
+                            950: '#06070B',
+                            900: '#0A0C12',
+                            850: '#0E111A',
+                        }
+                    },
+                    animation: {
+                        'float-slow': 'floatSlow 18s ease-in-out infinite',
+                        'float-reverse': 'floatReverse 22s ease-in-out infinite',
+                        'pulse-soft': 'pulseSoft 4s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        floatSlow: {
+                            '0%, 100%': { transform: 'translate3d(0, 0, 0) scale(1)' },
+                            '50%': { transform: 'translate3d(30px, -25px, 0) scale(1.06)' },
+                        },
+                        floatReverse: {
+                            '0%, 100%': { transform: 'translate3d(0, 0, 0) scale(1)' },
+                            '50%': { transform: 'translate3d(-35px, 20px, 0) scale(1.08)' },
+                        },
+                        pulseSoft: {
+                            '0%, 100%': { opacity: '0.75' },
+                            '50%': { opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg-deep: #06070B;
+            --glass-bg: rgba(255, 255, 255, 0.035);
+            --glass-bg-hover: rgba(255, 255, 255, 0.055);
+            --glass-border: rgba(255, 255, 255, 0.085);
+            --glass-specular: rgba(255, 255, 255, 0.16);
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: #F1F5F9;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Subtle SVG Film Grain Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0.032;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Floating Frosted Glass Navbar */
+        .frosted-nav {
+            background: rgba(10, 12, 18, 0.65);
+            backdrop-filter: saturate(180%) blur(22px);
+            -webkit-backdrop-filter: saturate(180%) blur(22px);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+        }
+
+        /* True Frosted Glass Surface with Specular Rim & Spotlight */
+        .glass-card {
+            position: relative;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.018) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-top-color: var(--glass-specular);
+            border-left-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 45px -20px rgba(0, 0, 0, 0.75);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(
+                520px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
+                rgba(129, 140, 248, 0.11),
+                rgba(56, 189, 248, 0.04) 40%,
+                transparent 75%
+            );
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        .glass-card-interactive:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.16);
+            border-top-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 26px 55px -18px rgba(0, 0, 0, 0.85), 0 0 30px -10px rgba(99, 102, 241, 0.15);
+        }
+
+        /* Glass Segmented Control */
+        .glass-segment {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .segment-btn {
+            color: #94A3B8;
+            transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .segment-btn:hover {
+            color: #F8FAFC;
+        }
+
+        .segment-btn.active {
+            background: rgba(255, 255, 255, 0.11);
+            color: #FFFFFF;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        }
+
+        /* Ambient Text Gradient */
+        .text-ambient-gradient {
+            background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 48%, #94A3B8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Glass Modal Sheet */
+        .glass-modal-backdrop {
+            background: rgba(3, 4, 8, 0.72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .glass-modal-panel {
+            background: linear-gradient(160deg, rgba(18, 22, 34, 0.88) 0%, rgba(10, 12, 19, 0.94) 100%);
+            backdrop-filter: saturate(160%) blur(28px);
+            -webkit-backdrop-filter: saturate(160%) blur(28px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-top-color: rgba(255, 255, 255, 0.22);
+            box-shadow: 0 32px 80px -15px rgba(0, 0, 0, 0.9);
+        }
+
+        /* Custom Subtle Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #06070B;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+    </style>
+</head>
+<body class="selection:bg-indigo-500/30 selection:text-indigo-200">
+
+    <!-- Subtle Film Grain Texture -->
+    <div class="noise-overlay" aria-hidden="true"></div>
+
+    <!-- Ambient Background Light Orbs -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
+        <!-- Top-Left Deep Indigo/Slate Orb -->
+        <div class="absolute -top-36 -left-28 w-[34rem] h-[34rem] rounded-full bg-indigo-600/[0.13] blur-[130px] animate-float-slow"></div>
+        <!-- Mid-Right Muted Teal/Cyan Orb -->
+        <div class="absolute top-[28%] -right-32 w-[30rem] h-[30rem] rounded-full bg-sky-500/[0.09] blur-[140px] animate-float-reverse"></div>
+        <!-- Bottom-Left Soft Violet Orb -->
+        <div class="absolute bottom-[-10%] left-[18%] w-[36rem] h-[36rem] rounded-full bg-violet-600/[0.09] blur-[150px] animate-float-slow"></div>
+        <!-- Subtle Radial Vignette -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,transparent_0%,#06070B_88%)]"></div>
+    </div>
+
+    <!-- Floating Frosted Glass Navbar -->
+    <div class="sticky top-4 z-40 px-4 sm:px-6">
+        <header class="frosted-nav max-w-4xl mx-auto rounded-2xl px-4 sm:px-6 h-14 flex items-center justify-between">
+            <!-- Monogram & Name -->
+            <a href="#" class="flex items-center gap-2.5 group">
+                <span class="w-7 h-7 rounded-lg bg-white/[0.07] border border-white/[0.14] flex items-center justify-center font-mono text-xs font-medium text-indigo-300 group-hover:border-indigo-400/40 group-hover:text-white transition-colors">
+                    ZW
+                </span>
+                <span class="font-semibold text-[14px] tracking-tight text-slate-100 group-hover:text-white transition-colors">
+                    Zelcy Wiluarta
+                </span>
+            </a>
+
+            <!-- Desktop Links -->
+            <nav class="hidden md:flex items-center gap-7 text-[13px] font-medium text-slate-400">
+                <a href="#about" data-i18n="nav.about" class="hover:text-white transition-colors">Tentang</a>
+                <a href="#projects" data-i18n="nav.projects" class="hover:text-white transition-colors">Karya</a>
+                <a href="#experience" data-i18n="nav.experience" class="hover:text-white transition-colors">Pengalaman</a>
+                <a href="#skills" data-i18n="nav.skills" class="hover:text-white transition-colors">Keahlian</a>
+            </nav>
+
+            <!-- Language Segmented Toggle & Mobile Button -->
+            <div class="flex items-center gap-2.5">
+                <div class="glass-segment rounded-xl p-0.5 flex items-center text-[11px] font-mono" role="group" aria-label="Language Switcher">
+                    <button id="btn-lang-id" onclick="setLanguage('id')" class="segment-btn active px-2.5 py-1 rounded-[9px] font-medium">ID</button>
+                    <button id="btn-lang-en" onclick="setLanguage('en')" class="segment-btn px-2.5 py-1 rounded-[9px] font-medium">EN</button>
+                </div>
+
+                <button id="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle Menu" class="md:hidden p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:text-white hover:bg-white/[0.08] transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Mobile Dropdown Sheet -->
+        <div id="mobile-menu" class="hidden md:hidden frosted-nav max-w-4xl mx-auto mt-2 rounded-2xl p-3 space-y-1 text-[14px] font-medium text-slate-300">
+            <a href="#about" onclick="closeMobileMenu()" data-i18n="nav.about" class="block px-3.5 py-2 rounded-xl hover:bg-white/[0.06] hover:text-white transition-colors">Tentang</a>
+            <a href="#projects" onclick="closeMobileMenu()" data-i18n="nav.projects" class="block px-3.5 py-2 rounded-xl hover:bg-white/[0.06] hover:text-white transition-colors">Karya</a>
+            <a href="#experience" onclick="closeMobileMenu()" data-i18n="nav.experience" class="block px-3.5 py-2 rounded-xl hover:bg-white/[0.06] hover:text-white transition-colors">Pengalaman</a>
+            <a href="#skills" onclick="closeMobileMenu()" data-i18n="nav.skills" class="block px-3.5 py-2 rounded-xl hover:bg-white/[0.06] hover:text-white transition-colors">Keahlian</a>
+        </div>
+    </div>
+
+    <main class="relative z-10 max-w-4xl mx-auto px-5 sm:px-8">
+
+        <!-- HERO SECTION -->
+        <section id="about" class="pt-14 pb-16 sm:pt-24 sm:pb-24">
+            <div class="max-w-2xl space-y-7">
+                <!-- Status Pill with Soft Ambient Pulse -->
+                <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.09] backdrop-blur-md">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                    </span>
+                    <span data-i18n="hero.status" class="text-[12px] font-medium text-slate-300 tracking-wide">
+                        Surabaya, Indonesia • Terbuka untuk Peluang
+                    </span>
+                </div>
+
+                <!-- Display Heading (Generous line-height & pb-2 so 'y' never clips) -->
+                <div class="space-y-3">
+                    <h1 class="text-4xl sm:text-6xl font-bold tracking-tight text-ambient-gradient leading-[1.2] pb-2">
+                        Zelcy Wiluarta
+                    </h1>
+                    <p data-i18n="hero.role" class="text-lg sm:text-xl font-medium text-indigo-300/90 leading-relaxed">
+                        Mahasiswa Teknik Komputer di PENS • Embedded Systems &amp; Web Developer
+                    </p>
+                </div>
+
+                <!-- Natural Bio -->
+                <p data-i18n="hero.bio" class="text-[15px] sm:text-[16.5px] text-slate-400 leading-[1.75]">
+                    Menempuh studi Teknik Komputer di Politeknik Elektronika Negeri Surabaya (PENS). Saya merancang sistem tertanam dan perangkat keras untuk robotika otonom, membangun aplikasi web maupun mobile yang presisi, serta tengah mendalami bahasa Jepang (JLPT N5–N4) sebagai persiapan berkarier di lingkungan rekayasa global.
+                </p>
+
+                <!-- Glassmorphic Action Buttons with Crisp Inline SVG Icons -->
+                <div class="flex flex-wrap items-center gap-3 pt-1">
+                    <a href="https://www.linkedin.com/in/zelcy-wiluarta/" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-white border border-indigo-400/30 hover:border-indigo-300/50 backdrop-blur-md text-[14px] font-medium transition-all shadow-[0_8px_25px_-6px_rgba(99,102,241,0.35)]">
+                        <svg class="w-4 h-4 fill-current text-indigo-300" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                        </svg>
+                        <span>LinkedIn</span>
+                    </a>
+
+                    <a href="https://github.com/Jeul-Si-666" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-white/[0.045] hover:bg-white/[0.09] text-slate-100 border border-white/[0.11] hover:border-white/[0.22] backdrop-blur-md text-[14px] font-medium transition-all">
+                        <svg class="w-4 h-4 fill-current text-slate-300" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                        </svg>
+                        <span>GitHub</span>
+                    </a>
+
+                    <a href="#projects"
+                       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-slate-400 hover:text-white text-[14px] font-medium transition-colors">
+                        <span data-i18n="hero.ctaProjects">Lihat Karya</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SELECTED WORKS / PROJECTS SECTION -->
+        <section id="projects" class="py-12 sm:py-16">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+                <div>
+                    <span class="font-mono text-[11px] uppercase tracking-[0.2em] text-indigo-400/90 block mb-1.5">01 / ARCHIVE</span>
+                    <h2 data-i18n="section.projects" class="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                        Karya &amp; Proyek Pilihan
+                    </h2>
+                    <p data-i18n="section.projectsSub" class="text-[14px] text-slate-400 mt-1">
+                        Eksplorasi sistem tertanam, robotika kompetitif, simulasi, dan aplikasi full-stack.
+                    </p>
+                </div>
+
+                <!-- Interactive Glass Category Filter -->
+                <div class="glass-segment rounded-xl p-1 inline-flex items-center text-[12px] font-medium self-start sm:self-auto" role="tablist">
+                    <button onclick="setProjectFilter('all')" data-filter="all" class="filter-tab segment-btn active px-3 py-1.5 rounded-[9px]" data-i18n="filter.all">
+                        Semua
+                    </button>
+                    <button onclick="setProjectFilter('embedded')" data-filter="embedded" class="filter-tab segment-btn px-3 py-1.5 rounded-[9px]" data-i18n="filter.embedded">
+                        Embedded &amp; Robotika
+                    </button>
+                    <button onclick="setProjectFilter('web')" data-filter="web" class="filter-tab segment-btn px-3 py-1.5 rounded-[9px]" data-i18n="filter.web">
+                        Web &amp; Aplikasi
+                    </button>
+                </div>
+            </div>
+
+            <!-- Projects Frosted Grid -->
+            <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- EXPERIENCE TIMELINE SECTION -->
+        <section id="experience" class="py-12 sm:py-16">
+            <div class="mb-8">
+                <span class="font-mono text-[11px] uppercase tracking-[0.2em] text-sky-400/90 block mb-1.5">02 / CHRONICLE</span>
+                <h2 data-i18n="section.experience" class="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                    Pengalaman
+                </h2>
+                <p data-i18n="section.experienceSub" class="text-[14px] text-slate-400 mt-1">
+                    Perjalanan di riset robotika, pengajaran, pelatihan bahasa Jepang, dan kepemimpinan organisasi.
+                </p>
+            </div>
+
+            <div class="glass-card rounded-3xl p-6 sm:p-8">
+                <div id="experience-container" class="relative space-y-8 before:absolute before:inset-y-2 before:left-[7px] before:w-[1px] before:bg-gradient-to-b before:from-indigo-400/50 before:via-white/10 before:to-transparent">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SKILLS & STACK BENTO GRID -->
+        <section id="skills" class="py-12 sm:py-16">
+            <div class="mb-8">
+                <span class="font-mono text-[11px] uppercase tracking-[0.2em] text-violet-400/90 block mb-1.5">03 / CAPABILITIES</span>
+                <h2 data-i18n="section.skills" class="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                    Keahlian &amp; Teknologi
+                </h2>
+                <p data-i18n="section.skillsSub" class="text-[14px] text-slate-400 mt-1">
+                    Perangkat keras, bahasa pemrograman, desain visual, dan kemampuan bahasa.
+                </p>
+            </div>
+
+            <div id="skills-container" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <!-- Populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- MINIMAL FROSTED FOOTER -->
+        <footer class="pt-10 pb-16 sm:pt-14 sm:pb-20">
+            <div class="glass-card rounded-3xl p-7 sm:p-9 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div class="space-y-1.5 max-w-md">
+                    <h2 data-i18n="footer.title" class="text-xl font-bold tracking-tight text-white">
+                        Mari Berdiskusi &amp; Berkolaborasi
+                    </h2>
+                    <p data-i18n="footer.desc" class="text-[14px] text-slate-400 leading-relaxed">
+                        Tertarik membahas proyek embedded systems, robotika, pengembangan perangkat lunak, atau peluang kolaborasi? Silakan hubungi saya.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 shrink-0">
+                    <a href="https://www.linkedin.com/in/zelcy-wiluarta/" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.12] text-white text-[13px] font-medium transition-all">
+                        <svg class="w-4 h-4 fill-current text-indigo-300" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                        </svg>
+                        <span>LinkedIn</span>
+                    </a>
+
+                    <a href="https://github.com/Jeul-Si-666" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.12] text-white text-[13px] font-medium transition-all">
+                        <svg class="w-4 h-4 fill-current text-slate-300" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                        </svg>
+                        <span>GitHub</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-slate-500">
+                <span>© 2026 Zelcy Wiluarta • Politeknik Elektronika Negeri Surabaya</span>
+                <div class="flex items-center gap-5">
+                    <a href="https://www.linkedin.com/in/zelcy-wiluarta/" target="_blank" rel="noopener noreferrer" class="hover:text-slate-300 transition-colors">LinkedIn</a>
+                    <a href="https://github.com/Jeul-Si-666" target="_blank" rel="noopener noreferrer" class="hover:text-slate-300 transition-colors">GitHub</a>
+                    <a href="#" class="hover:text-slate-300 transition-colors" data-i18n="footer.top">Kembali ke atas ↑</a>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Frosted Glass Detail Modal -->
+    <div id="project-modal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center p-0 sm:p-6 glass-modal-backdrop" role="dialog" aria-modal="true">
+        <div class="glass-modal-panel w-full max-w-xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto relative">
+            <!-- Mobile Sheet Pill -->
+            <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-5 sm:hidden"></div>
+
+            <!-- Close Icon Button -->
+            <button onclick="closeModal()" aria-label="Tutup Modal" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.14] border border-white/[0.1] flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+
+            <div id="modal-body" class="space-y-5">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let lang = 'id';
+        let activeFilter = 'all';
+
+        const dictionary = {
+            id: {
+                'nav.about': 'Tentang',
+                'nav.projects': 'Karya',
+                'nav.experience': 'Pengalaman',
+                'nav.skills': 'Keahlian',
+                'hero.status': 'Surabaya, Indonesia • Terbuka untuk Peluang',
+                'hero.role': 'Mahasiswa Teknik Komputer di PENS • Embedded Systems & Web Developer',
+                'hero.bio': 'Menempuh studi Teknik Komputer di Politeknik Elektronika Negeri Surabaya (PENS). Saya merancang sistem tertanam dan perangkat keras untuk robotika otonom, membangun aplikasi web maupun mobile yang presisi, serta tengah mendalami bahasa Jepang (JLPT N5–N4) sebagai persiapan berkarier di lingkungan rekayasa global.',
+                'hero.ctaProjects': 'Lihat Karya',
+                'section.projects': 'Karya & Proyek Pilihan',
+                'section.projectsSub': 'Eksplorasi sistem tertanam, robotika kompetitif, simulasi, dan aplikasi full-stack.',
+                'filter.all': 'Semua',
+                'filter.embedded': 'Embedded & Robotika',
+                'filter.web': 'Web & Aplikasi',
+                'section.experience': 'Pengalaman',
+                'section.experienceSub': 'Perjalanan di riset robotika, pengajaran, pelatihan bahasa Jepang, dan kepemimpinan organisasi.',
+                'section.skills': 'Keahlian & Teknologi',
+                'section.skillsSub': 'Perangkat keras, bahasa pemrograman, desain visual, dan kemampuan bahasa.',
+                'footer.title': 'Mari Berdiskusi & Berkolaborasi',
+                'footer.desc': 'Tertarik membahas proyek embedded systems, robotika, pengembangan perangkat lunak, atau peluang kolaborasi? Silakan hubungi saya.',
+                'footer.top': 'Kembali ke atas ↑',
+                'badge.present': 'Saat ini',
+                'modal.highlights': 'Sorotan Teknis',
+                'modal.tools': 'Teknologi & Perangkat',
+                'modal.github': 'Buka di GitHub',
+                'modal.close': 'Tutup'
+            },
+            en: {
+                'nav.about': 'About',
+                'nav.projects': 'Works',
+                'nav.experience': 'Experience',
+                'nav.skills': 'Skills',
+                'hero.status': 'Surabaya, Indonesia • Open to Opportunities',
+                'hero.role': 'Computer Engineering Student at PENS • Embedded Systems & Web Developer',
+                'hero.bio': 'Studying Computer Engineering at Politeknik Elektronika Negeri Surabaya (PENS). I design embedded systems and hardware for autonomous robotics, build precise web and mobile applications, and am studying Japanese (JLPT N5–N4) in preparation for a global engineering career.',
+                'hero.ctaProjects': 'Explore Works',
+                'section.projects': 'Selected Works & Projects',
+                'section.projectsSub': 'Explorations across embedded systems, competitive robotics, simulation, and full-stack apps.',
+                'filter.all': 'All',
+                'filter.embedded': 'Embedded & Robotics',
+                'filter.web': 'Web & Apps',
+                'section.experience': 'Experience',
+                'section.experienceSub': 'Journey across robotics research, teaching, Japanese language training, and leadership.',
+                'section.skills': 'Skills & Stack',
+                'section.skillsSub': 'Hardware platforms, programming languages, visual design, and spoken languages.',
+                'footer.title': "Let's Discuss & Collaborate",
+                'footer.desc': 'Interested in embedded systems, robotics, software engineering, or potential collaborations? Feel free to reach out.',
+                'footer.top': 'Back to top ↑',
+                'badge.present': 'Present',
+                'modal.highlights': 'Technical Highlights',
+                'modal.tools': 'Stack & Tools',
+                'modal.github': 'View on GitHub',
+                'modal.close': 'Close'
+            }
+        };
+
+        const projectsData = [
+            {
+                id: 'ersow',
+                title: 'ERSOW — Wheeled Soccer Robot',
+                category: ['embedded'],
+                tag: { id: 'Embedded & Robotika', en: 'Embedded & Robotics' },
+                summary: {
+                    id: 'Pengembangan perangkat keras dan sistem tertanam real-time (STM32, FreeRTOS) pada robot sepak bola beroda untuk Kontes Robot Indonesia (KRI).',
+                    en: 'Hardware and real-time embedded systems development (STM32, FreeRTOS) for wheeled soccer robots competing in the Indonesian Robot Contest (KRI).'
+                },
+                details: {
+                    id: [
+                        'Perancangan integrasi perangkat keras dan mikrokontroler STM32 untuk manuver robot beroda kecepatan tinggi.',
+                        'Pengembangan firmware deterministik menggunakan C/C++, FreeRTOS, dan CMSIS-RTOS v1 untuk pembacaan sensor dan kontrol aktuator.',
+                        'Pengujian keandalan sistem di lapangan selama siklus kompetisi Kontes Robot Indonesia (KRI).'
+                    ],
+                    en: [
+                        'Hardware integration and STM32 microcontroller interfacing for high-speed omnidirectional wheeled robots.',
+                        'Deterministic firmware development using C/C++, FreeRTOS, and CMSIS-RTOS v1 for sensor fusion and actuator control.',
+                        'Field reliability tuning and hardware diagnostics during Indonesian Robot Contest (KRI) cycles.'
+                    ]
+                },
+                stack: ['STM32', 'C / C++', 'FreeRTOS', 'CMSIS-RTOS v1'],
+                url: 'https://github.com/Jeul-Si-666'
+            },
+            {
+                id: 'kotoba-flow',
+                title: 'KOTOBA Flow',
+                category: ['web'],
+                tag: { id: 'Web & Aplikasi', en: 'Web & Apps' },
+                summary: {
+                    id: 'Aplikasi pembelajaran kosakata bahasa Jepang terinspirasi Duolingo untuk kata kerja & kata sifat Minna no Nihongo (N5–N4) dengan level bertahap.',
+                    en: 'Duolingo-inspired Japanese vocabulary learning app covering Minna no Nihongo (N5–N4) verbs & adjectives with progressive levels and spaced recall.'
+                },
+                details: {
+                    id: [
+                        'Kurikulum terstruktur berdasarkan bab dan level kata kerja serta kata sifat dari buku Minna no Nihongo (JLPT N5–N4).',
+                        'Mekanisme pengulangan berkala (spaced recall) untuk memperkuat daya ingat kosakata secara bertahap.',
+                        'Antarmuka latihan interaktif yang ringkas dan nyaman digunakan di perangkat web maupun mobile.'
+                    ],
+                    en: [
+                        'Structured progression modules organized by verb and adjective levels from Minna no Nihongo (JLPT N5–N4).',
+                        'Spaced-recall practice mechanics engineered to strengthen long-term vocabulary retention.',
+                        'Clean, tactile interactive quiz experience designed for both web and mobile browsers.'
+                    ]
+                },
+                stack: ['JavaScript', 'Spaced Recall', 'JLPT N5–N4'],
+                url: 'https://github.com/Jeul-Si-666'
+            },
+            {
+                id: 'line-follower-sim',
+                title: 'Line-Follower Track Simulator',
+                category: ['web', 'embedded'],
+                tag: { id: 'Web & Robotika', en: 'Web & Robotics' },
+                summary: {
+                    id: 'Simulator lintasan robot line-follower berbasis HTML5 Canvas modular (ViewCanvas, RawCanvas, BinaryCanvas) dengan impor PDF.js.',
+                    en: 'Modular JavaScript HTML5 Canvas line-follower simulator (ViewCanvas, RawCanvas, BinaryCanvas) with PDF.js map importing and binary thresholding.'
+                },
+                details: {
+                    id: [
+                        'Arsitektur kanvas berlapis yang memisahkan lapisan tampilan (ViewCanvas), gambar mentah (RawCanvas), dan hasil biner (BinaryCanvas).',
+                        'Mendukung impor langsung cetak biru lintasan berformat PDF menggunakan PDF.js.',
+                        'Pipeline thresholding hitam-putih untuk ekstraksi garis lintasan dan simulasi pembacaan array sensor secara akurat.'
+                    ],
+                    en: [
+                        'Layered canvas architecture separating display rendering (ViewCanvas), source image (RawCanvas), and binary mask (BinaryCanvas).',
+                        'Direct PDF track blueprint importing powered by PDF.js.',
+                        'Black-and-white thresholding pipeline for crisp line extraction and virtual sensor array testing.'
+                    ]
+                },
+                stack: ['JavaScript', 'HTML5 Canvas', 'PDF.js'],
+                url: 'https://github.com/Jeul-Si-666'
+            },
+            {
+                id: 'dc-motor-pid',
+                title: 'DC Motor PID Control & Serial Dashboard',
+                category: ['embedded'],
+                tag: { id: 'Embedded & Robotika', en: 'Embedded & Robotics' },
+                summary: {
+                    id: 'Sistem kendali RPM motor DC loop-tertutup real-time menggunakan Arduino Due, quadrature encoder, LCD lokal, dan dashboard telemetri USB.',
+                    en: 'Real-time closed-loop DC motor RPM control using Arduino Due, quadrature encoder, onboard LCD/buttons, and bidirectional USB serial telemetry.'
+                },
+                details: {
+                    id: [
+                        'Pembacaan sinyal quadrature encoder berbasis interupsi perangkat keras pada Arduino Due untuk akurasi RPM real-time.',
+                        'Algoritma kendali PID loop-tertutup dengan penalaan parameter langsung melalui tombol dan layar LCD onboard.',
+                        'Komunikasi serial USB dua arah ke dashboard telemetri di laptop untuk pemantauan grafik respons kecepatan.'
+                    ],
+                    en: [
+                        'Hardware-interrupt quadrature encoder decoding on Arduino Due for high-resolution real-time RPM feedback.',
+                        'Closed-loop PID controller with live parameter tuning via onboard physical buttons and LCD readout.',
+                        'Bidirectional USB serial telemetry streaming to a laptop dashboard for live step-response plotting.'
+                    ]
+                },
+                stack: ['C++', 'Arduino Due', 'PID Control', 'USB Serial'],
+                url: 'https://github.com/Jeul-Si-666'
+            },
+            {
+                id: 'crm-catalog',
+                title: 'Full-Stack CRM & Catalog Platform',
+                category: ['web'],
+                tag: { id: 'Web & Aplikasi', en: 'Web & Apps' },
+                summary: {
+                    id: 'Aplikasi web full-stack berbasis Django dan TypeScript dengan alur kerja CRM modular dan sistem pengelolaan media katalog produk.',
+                    en: 'Full-stack Django and TypeScript web application featuring modular CRM workflows and structured product media management.'
+                },
+                details: {
+                    id: [
+                        'Arsitektur backend Django yang terstruktur untuk pengelolaan data pelanggan, riwayat interaksi, dan inventaris katalog.',
+                        'Antarmuka frontend TypeScript dengan komponen unggah dan kurasi foto produk yang responsif.',
+                        'Alur kerja CRM modular untuk mempermudah pelacakan prospek dan operasional bisnis.'
+                    ],
+                    en: [
+                        'Structured Django backend architecture handling customer records, interaction logs, and product catalog data.',
+                        'TypeScript frontend featuring responsive product media upload and gallery curation components.',
+                        'Modular CRM pipelines designed to streamline lead tracking and daily operations.'
+                    ]
+                },
+                stack: ['Django', 'TypeScript', 'Python'],
+                url: 'https://github.com/Jeul-Si-666'
+            },
+            {
+                id: 'nice-music',
+                title: 'NiCe Music',
+                category: ['web'],
+                tag: { id: 'Mobile & Audio', en: 'Mobile & Audio' },
+                summary: {
+                    id: 'Pemutar musik lokal berbasis Flutter dengan antarmuka dark glassmorphism yang halus dan pipeline audio stream kustom.',
+                    en: 'Local Flutter music streaming player featuring a smooth dark glassmorphism UI and a custom audio stream pipeline.'
+                },
+                details: {
+                    id: [
+                        'Antarmuka pemutar audio bergaya dark glassmorphism dengan transisi halus dan kontrol pemutaran yang responsif.',
+                        'Pipeline audio stream kustom untuk pemutaran berkas musik lokal dengan latensi rendah.',
+                        'Manajemen daftar putar dan ekstraksi metadata audio yang ringan di perangkat mobile.'
+                    ],
+                    en: [
+                        'Dark glassmorphism audio player interface with fluid transitions and responsive playback controls.',
+                        'Custom audio stream pipeline built for low-latency local music playback.',
+                        'Lightweight playlist organization and local audio metadata indexing on mobile devices.'
+                    ]
+                },
+                stack: ['Flutter', 'Dart', 'Audio Stream'],
+                url: 'https://github.com/Jeul-Si-666'
+            }
+        ];
+
+        const experienceData = [
+            {
+                role: { id: 'Japanese Language Trainee', en: 'Japanese Language Trainee' },
+                company: 'JAPAN CREATE, LTD.',
+                type: { id: 'Paruh Waktu', en: 'Part-time' },
+                period: { id: 'Nov 2026 – Saat ini', en: 'Nov 2026 – Present' },
+                location: 'Surabaya, Jawa Timur',
+                current: true,
+                points: {
+                    id: [
+                        'Mengikuti program pelatihan intensif bahasa Jepang yang diselenggarakan JAPAN CREATE bekerja sama dengan PENS.',
+                        'Berfokus pada persiapan JLPT dan komunikasi profesional di lingkungan industri Jepang.'
+                    ],
+                    en: [
+                        'Participating in an intensive Japanese language training program organized by JAPAN CREATE in collaboration with PENS.',
+                        'Focusing on JLPT readiness and professional workplace communication in Japanese engineering environments.'
+                    ]
+                },
+                skills: ['JLPT N5–N4', 'Bahasa Jepang']
+            },
+            {
+                role: { id: 'Coach Robotik', en: 'Robotics Coach' },
+                company: 'SD Muhammadiyah 4 Pucang Surabaya',
+                type: { id: 'Paruh Waktu', en: 'Part-time' },
+                period: { id: 'Sep 2026 – Saat ini', en: 'Sep 2026 – Present' },
+                location: 'Surabaya',
+                current: true,
+                points: {
+                    id: [
+                        'Memperkenalkan logika dasar pemrograman kepada siswa melalui platform Maze-Solving Robot.',
+                        'Melatih kemampuan berpikir kritis siswa kelas 4 SD dalam menyusun algoritma pencarian rute terpendek.'
+                    ],
+                    en: [
+                        'Introducing fundamental programming logic to students using a Maze-Solving Robot platform.',
+                        'Developing fourth-grade students’ critical thinking skills by challenging them to devise shortest-path strategies.'
+                    ]
+                },
+                skills: ['Mobile Robotics', 'Pemrograman']
+            },
+            {
+                role: { id: 'Hardware Embedded', en: 'Hardware Embedded' },
+                company: 'EEPIS Robot Soccer On Wheeled (ERSOW)',
+                type: { id: 'Purnawaktu', en: 'Full-time' },
+                period: { id: 'Des 2024 – Mei 2026 · 1 thn 6 bln', en: 'Dec 2024 – May 2026 · 1 yr 6 mos' },
+                location: 'Surabaya (PENS)',
+                current: false,
+                points: {
+                    id: [
+                        'Berkontribusi dalam riset dan pengembangan robot sepak bola beroda untuk Kontes Robot Indonesia (KRI).',
+                        'Menangani integrasi elektronika, sistem tertanam, serta pemrograman firmware tingkat rendah menggunakan C dan C++.'
+                    ],
+                    en: [
+                        'Contributed to the R&D of autonomous wheeled soccer robots for the Indonesian Robot Contest (KRI).',
+                        'Handled electronics integration, embedded systems architecture, and low-level C/C++ firmware development.'
+                    ]
+                },
+                skills: ['Electronics', 'Embedded Systems', 'C', 'C++']
+            },
+            {
+                role: { id: 'Design and Documentation Staff', en: 'Design and Documentation Staff' },
+                company: 'CAMPUS EXPO SMAPA',
+                type: { id: 'Pekerja Lepas', en: 'Freelance' },
+                period: { id: 'Mei 2024 – Feb 2026 · 1 thn 10 bln', en: 'May 2024 – Feb 2026 · 1 yr 10 mos' },
+                location: 'Lamongan, Jawa Timur',
+                current: false,
+                points: {
+                    id: [
+                        'Merancang aset visual media sosial, poster promosi, dan event signage untuk menjaga konsistensi identitas acara.',
+                        'Melaksanakan dokumentasi fotografi selama rangkaian kegiatan berlangsung.'
+                    ],
+                    en: [
+                        'Designed social media graphics, promotional posters, and event signage to maintain a cohesive visual identity.',
+                        'Covered event photography and visual documentation across the expo.'
+                    ]
+                },
+                skills: ['Desain Grafis', 'Fotografi Acara']
+            },
+            {
+                role: { id: 'Koor Seksi Bidang TIK', en: 'ICT Division Coordinator' },
+                company: 'OSIS SMAN 1 Paciran',
+                type: { id: 'Paruh Waktu', en: 'Part-time' },
+                period: { id: '2021 – 2023', en: '2021 – 2023' },
+                location: 'Lamongan',
+                current: false,
+                points: {
+                    id: [
+                        'Mengoordinasikan infrastruktur TIK organisasi, publikasi digital, serta produksi dan pengeditan video kegiatan.'
+                    ],
+                    en: [
+                        'Coordinated student organization ICT operations, digital media, and event video production.'
+                    ]
+                },
+                skills: ['Kepemimpinan', 'Pengeditan Video']
+            }
+        ];
+
+        const skillsData = [
+            {
+                title: { id: 'Embedded & Robotika', en: 'Embedded & Robotics' },
+                accent: 'text-indigo-300 border-indigo-400/20 bg-indigo-500/[0.08]',
+                icon: `<svg class="w-4 h-4 text-indigo-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>`,
+                items: ['C', 'C++', 'STM32CubeMX', 'FreeRTOS', 'Arduino Due', 'PID Control']
+            },
+            {
+                title: { id: 'Web & App Development', en: 'Web & App Development' },
+                accent: 'text-sky-300 border-sky-400/20 bg-sky-500/[0.08]',
+                icon: `<svg class="w-4 h-4 text-sky-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>`,
+                items: ['Python', 'Django', 'JavaScript', 'TypeScript', 'Flutter', 'HTML5 Canvas', 'Tailwind CSS']
+            },
+            {
+                title: { id: 'Desain, Tools & Bahasa', en: 'Design, Tools & Languages' },
+                accent: 'text-violet-300 border-violet-400/20 bg-violet-500/[0.08]',
+                icon: `<svg class="w-4 h-4 text-violet-300" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>`,
+                items: ['Git', 'Obsidian', 'Visual Identity & Media', 'Japanese (JLPT N5–N4)', 'English', 'Indonesian']
+            }
+        ];
+
+        function renderProjects() {
+            const container = document.getElementById('projects-container');
+            const filtered = activeFilter === 'all'
+                ? projectsData
+                : projectsData.filter(p => p.category.includes(activeFilter));
+
+            container.innerHTML = filtered.map(proj => `
+                <article onclick="openModal('${proj.id}')" class="glass-card glass-card-interactive rounded-2xl p-6 flex flex-col justify-between cursor-pointer group">
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between gap-2 mb-3.5">
+                            <span class="font-mono text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-lg bg-white/[0.045] border border-white/[0.08] text-indigo-300">
+                                ${proj.tag[lang]}
+                            </span>
+                            <span class="w-7 h-7 rounded-lg bg-white/[0.03] border border-white/[0.07] flex items-center justify-center text-slate-400 group-hover:text-white group-hover:border-white/20 transition-all">
+                                <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M7 7h10v10"/>
+                                </svg>
+                            </span>
+                        </div>
+
+                        <h3 class="text-[18px] font-semibold text-white tracking-tight mb-2 group-hover:text-indigo-200 transition-colors">
+                            ${proj.title}
+                        </h3>
+
+                        <p class="text-[14px] text-slate-400 leading-relaxed mb-5">
+                            ${proj.summary[lang]}
+                        </p>
+                    </div>
+
+                    <div class="relative z-10 flex flex-wrap gap-1.5 pt-3.5 border-t border-white/[0.07]">
+                        ${proj.stack.map(tech => `
+                            <span class="px-2.5 py-1 rounded-lg bg-white/[0.035] text-slate-300 font-mono text-[11.5px]">
+                                ${tech}
+                            </span>
+                        `).join('')}
+                    </div>
+                </article>
+            `).join('');
+
+            attachSpotlightListeners();
+        }
+
+        function renderExperiences() {
+            const container = document.getElementById('experience-container');
+            container.innerHTML = experienceData.map(item => `
+                <div class="relative pl-7 z-10">
+                    <!-- Timeline Node -->
+                    <span class="absolute left-0 top-1.5 w-[15px] h-[15px] rounded-full flex items-center justify-center ${item.current ? 'bg-indigo-500/30 border border-indigo-400' : 'bg-[#0E111A] border border-white/25'}">
+                        <span class="w-1.5 h-1.5 rounded-full ${item.current ? 'bg-indigo-300' : 'bg-slate-400'}"></span>
+                    </span>
+
+                    <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 mb-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h3 class="text-[16.5px] font-semibold text-white">
+                                ${item.role[lang]}
+                            </h3>
+                            ${item.current ? `
+                                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/15 border border-emerald-400/25 text-emerald-300">
+                                    ${dictionary[lang]['badge.present']}
+                                </span>
+                            ` : ''}
+                        </div>
+                        <span class="font-mono text-[12px] text-slate-400 shrink-0">
+                            ${item.period[lang]}
+                        </span>
+                    </div>
+
+                    <div class="text-[13.5px] font-medium text-indigo-300/90 mb-2.5">
+                        ${item.company} <span class="text-slate-500 font-normal">• ${item.type[lang]} • ${item.location}</span>
+                    </div>
+
+                    <ul class="space-y-1.5 text-[14px] text-slate-400 leading-relaxed mb-3">
+                        ${item.points[lang].map(pt => `
+                            <li class="flex items-start gap-2.5">
+                                <span class="w-1 h-1 rounded-full bg-slate-500 mt-2.5 shrink-0"></span>
+                                <span>${pt}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+
+                    <div class="flex flex-wrap gap-1.5">
+                        ${item.skills.map(skill => `
+                            <span class="px-2.5 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.07] text-slate-300 text-[11.5px]">
+                                ${skill}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderSkills() {
+            const container = document.getElementById('skills-container');
+            container.innerHTML = skillsData.map(group => `
+                <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+                    <div class="relative z-10">
+                        <div class="w-9 h-9 rounded-xl border ${group.accent} flex items-center justify-center mb-4">
+                            ${group.icon}
+                        </div>
+                        <h3 class="text-[16px] font-semibold text-white mb-4">
+                            ${group.title[lang]}
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            ${group.items.map(skill => `
+                                <span class="px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-slate-200 text-[12.5px] font-medium transition-colors">
+                                    ${skill}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            attachSpotlightListeners();
+        }
+
+        function setProjectFilter(filter) {
+            activeFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderProjects();
+        }
+
+        function setLanguage(newLang) {
+            lang = newLang;
+            document.documentElement.lang = lang;
+
+            document.getElementById('btn-lang-id').classList.toggle('active', lang === 'id');
+            document.getElementById('btn-lang-en').classList.toggle('active', lang === 'en');
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dictionary[lang][key]) {
+                    el.textContent = dictionary[lang][key];
+                }
+            });
+
+            renderProjects();
+            renderExperiences();
+            renderSkills();
+        }
+
+        function openModal(projectId) {
+            const proj = projectsData.find(p => p.id === projectId);
+            if (!proj) return;
+
+            const modal = document.getElementById('project-modal');
+            const body = document.getElementById('modal-body');
+
+            body.innerHTML = `
+                <div class="pr-8">
+                    <span class="font-mono text-[11px] uppercase tracking-wider text-indigo-300">${proj.tag[lang]}</span>
+                    <h3 class="text-2xl font-bold text-white tracking-tight mt-1">${proj.title}</h3>
+                </div>
+
+                <p class="text-[15px] text-slate-300 leading-relaxed">
+                    ${proj.summary[lang]}
+                </p>
+
+                <div class="rounded-2xl bg-white/[0.035] border border-white/[0.08] p-4 sm:p-5 space-y-3">
+                    <h4 class="font-mono text-[11px] uppercase tracking-wider text-slate-400">
+                        ${dictionary[lang]['modal.highlights']}
+                    </h4>
+                    <ul class="space-y-2.5 text-[14px] text-slate-200 leading-relaxed">
+                        ${proj.details[lang].map(detail => `
+                            <li class="flex items-start gap-2.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-2 shrink-0"></span>
+                                <span>${detail}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-mono text-[11px] uppercase tracking-wider text-slate-400 mb-2.5">
+                        ${dictionary[lang]['modal.tools']}
+                    </h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${proj.stack.map(s => `
+                            <span class="px-3 py-1 rounded-lg bg-white/[0.05] border border-white/[0.09] text-slate-200 font-mono text-[12px]">
+                                ${s}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.08]">
+                    <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.09] text-slate-300 hover:text-white text-[13px] font-medium transition-colors">
+                        ${dictionary[lang]['modal.close']}
+                    </button>
+                    <a href="${proj.url}" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-500/25 hover:bg-indigo-500/35 border border-indigo-400/35 text-white text-[13px] font-medium transition-colors">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                        </svg>
+                        <span>${dictionary[lang]['modal.github']}</span>
+                    </a>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('project-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        function attachSpotlightListeners() {
+            document.querySelectorAll('.glass-card').forEach(card => {
+                if (card.dataset.spotlightBound) return;
+                card.dataset.spotlightBound = 'true';
+                card.addEventListener('mousemove', e => {
+                    const rect = card.getBoundingClientRect();
+                    card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                    card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+                });
+            });
+        }
+
+        document.getElementById('project-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProjects();
+            renderExperiences();
+            renderSkills();
+            attachSpotlightListeners();
+        });
+    </script>
+</body>
+</html>
